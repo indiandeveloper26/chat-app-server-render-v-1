@@ -1,10 +1,26 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const cors = require('cors');
-const fs = require('fs');
+
+import http from 'http'
+
+import express from 'express';  // Use ES6 import syntax (if "type": "module" is set in package.json)
+
+import { Server } from 'socket.io'; // Importing the Server class from socket.io
+import cors from 'cors'
+import router from './route/userroute.js';
+import { connectDB } from './db.js';
+
+
+
+
+
+
 
 const app = express();
+
+
+app.use(express.json());
+
+app.use('/saveuser',router)
+
 const server = http.createServer(app);
 
 // Set up CORS to allow connections from your React app
@@ -16,26 +32,20 @@ app.use(cors({
 
 // Initialize Socket.IO
 
+connectDB()
 
 
-app.get('/hello',(req,res)=>{
+const io = new Server(server,{
+  cors: {
+    origin: '*', // Allow only the React app on this port
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+    credentials: true
+  }
+});
 
 
-  res.send("hello sahil india")
-})
 
-
-
-const io = socketIo(server, {
-    cors: {
-      origin: '*', // Allow only the React app on this port
-      methods: ['GET', 'POST'],
-      allowedHeaders: ['Content-Type'],
-      credentials: true
-    }
-  });
-
-// Socket.IO connection
 io.on('connection', (socket) => {
 console.log('thisi uer ')
 
@@ -63,6 +73,10 @@ console.log('thisi uer ')
 
 
 
+});
+
+app.get('/', (req, res) => {
+  res.send('Hello, welcome to my Express app!');
 });
 
 // Start the server
