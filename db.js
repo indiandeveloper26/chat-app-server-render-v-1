@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 export const connectDB = async () => {
     try {
-      await mongoose.connect('mongodb+srv://sahilmummy1996:sahilmummy1996@cluster0.rs7ne.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+      await mongoose.connect('mongodb+srv://akgaud079:sahilmummy@cluster0.pcpf2.mongodb.net/', {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
@@ -14,7 +14,7 @@ export const connectDB = async () => {
     }
   };
   
-  
+  connectDB()
   
   
   

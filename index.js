@@ -1,5 +1,5 @@
 
-import http from 'http'
+
 
 import express from 'express';  // Use ES6 import syntax (if "type": "module" is set in package.json)
 
@@ -7,20 +7,22 @@ import { Server } from 'socket.io'; // Importing the Server class from socket.io
 import cors from 'cors'
 import router from './route/userroute.js';
 import { connectDB } from './db.js';
+import routert from './route/test.js';
+import http from 'http'
 
 
 
-
+connectDB()
 
 
 
 const app = express();
 
-
+app.use(cors())
 app.use(express.json());
 
 app.use('/saveuser',router)
-
+app.use('/test',routert)
 const server = http.createServer(app);
 
 // Set up CORS to allow connections from your React app
@@ -32,7 +34,7 @@ app.use(cors({
 
 // Initialize Socket.IO
 
-connectDB()
+
 
 
 const io = new Server(server,{
@@ -46,34 +48,84 @@ const io = new Server(server,{
 
 
 
-io.on('connection', (socket) => {
-console.log('thisi uer ')
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
+
+  // Send socket.id to the client
+
+
+
+
+  
+
+
+
+
+
+
+  const socketUsernameMap = {};
+
+  
+
+
+
+  io.on('connection', (socket) => {
+    console.log('A user connected: ' + socket.id);
+  
+    // Event to set username
+    socket.on('setUsername', (username) => {
+      // Save the socket.id and username mapping
+      socketUsernameMap[socket.id] = username;
+      console.log(`Username set for ${socket.id}: ${username}`);
+  
+      // Send confirmation to the client
+      socket.emit('usernameSet', `Username ${username} set successfully.`);
+    });
+  
+    // Event to send private messages
+    socket.on('sendMessage', (recipientUsername, message) => {
+      // Find the recipient's socket.id based on their username
+      const recipientSocketId = Object.keys(socketUsernameMap).find(
+        (id) => socketUsernameMap[id] === recipientUsername
+      );
+  
+      if (recipientSocketId) {
+        // Send the private message to the recipient
+        io.to(recipientSocketId).emit('privateMessage', {
+          from: socketUsernameMap[socket.id],
+          message,
+        });
+        console.log(`Message sent to ${recipientUsername}: ${message}`);
+      } else {
+        console.log(`Recipient with username ${recipientUsername} not found`);
+        socket.emit('error', `Recipient ${recipientUsername} not found.`);
+      }
+    });
+  
+    // Handle disconnect
+    socket.on('disconnect', () => {
+      const username = socketUsernameMap[socket.id];
+      delete socketUsernameMap[socket.id]; // Remove the mapping when the user disconnects
+      console.log(`${username} disconnected.`);
+    });
   });
 
-  socket.on('message', (data) => {
-    console.log('Received message:', {'text':data});
-    io.emit('private', data);
-
-
-  });
-
-
-  socket.on('private', (recipientSocketId, message) => {
-    console.log(`Sending private message to ${recipientSocketId}`);
-    // io.to(recipientSocketId).emit('message', {
-    //   from: clients[socket.id],
-    //   message: message
-    // });
-
-    console.log('first,',message)
-  });
 
 
 
-});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.get('/', (req, res) => {
   res.send('Hello, welcome to my Express app!');
