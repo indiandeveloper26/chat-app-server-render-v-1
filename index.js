@@ -59,6 +59,16 @@ const io = new Server(server,{
 
 
 
+app.get('/apitest',(req,res)=>{
+  res.json({"tstingdata":"sahilinida devloper"})
+})
+
+
+
+app.get('/',(req,res)=>{
+  res.json({"tstingdata":"sahilinida devlope22r"})
+})
+
 
   // Send socket.id to the client
 
