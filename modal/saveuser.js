@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-     adduser: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Adduser' }]
+     addusername: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Adduser' }]
   });
 
   const Crateuser  = mongoose.model('Crateuser', userSchema);

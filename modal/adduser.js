@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 
 
 const PostSchema = new mongoose.Schema({
-    addnum: { type: Number, required: true, },
+    adduser: { type: String, required: true, },
 
     // This field references the User model
    

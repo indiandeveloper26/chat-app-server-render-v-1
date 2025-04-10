@@ -6,10 +6,10 @@ import express from 'express'
 const routert = express.Router();
 
 
-routert.get('/',(req,res)=>{
+routert.post('/',(req,res)=>{
     res.json([
         {
-          "_id": "67d99d62de0a72b8e73908d6",
+          "_id": "639283",
           "addnum": 639283179899,
           "__v": 0
         },

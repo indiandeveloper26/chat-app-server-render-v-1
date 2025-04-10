@@ -9,10 +9,13 @@ import router from './route/userroute.js';
 import { connectDB } from './db.js';
 import routert from './route/test.js';
 import http from 'http'
+import { serchroute } from './route/search.js';
+import derouter from './route/delete.js';
+import routeget from './route/getuser.js';
 
 
 
-connectDB()
+
 
 
 
@@ -23,6 +26,9 @@ app.use(express.json());
 
 app.use('/saveuser',router)
 app.use('/test',routert)
+app.use('/search',serchroute)
+app.use('/delate',derouter)
+app.use('/alluserget',routeget)
 const server = http.createServer(app);
 
 // Set up CORS to allow connections from your React app
@@ -35,7 +41,11 @@ app.use(cors({
 // Initialize Socket.IO
 
 
-
+try {
+  connectDB()
+} catch (error) {
+  console.log('error',error)
+}
 
 const io = new Server(server,{
   cors: {
@@ -70,10 +80,15 @@ const io = new Server(server,{
 
   io.on('connection', (socket) => {
     console.log('A user connected: ' + socket.id);
+  io.emit('server','serer conner')
+
+
   
     // Event to set username
     socket.on('setUsername', (username) => {
       // Save the socket.id and username mapping
+
+      console.log(username)
       socketUsernameMap[socket.id] = username;
       console.log(`Username set for ${socket.id}: ${username}`);
   

@@ -142,24 +142,31 @@ const {username,password}=req.body
 
   router.post('/adduser',async(req,res)=>{
 
-    const {email,number}=req.body
+    const {localusernam,adduser}=req.body
 
-
-    console.log(email,number)
+console.log(localusernam,adduser)
+  
 
    try {
-    const savenum=await Adduser({addnum:number})
+    const savenum=await Adduser({adduser:adduser})
     await savenum.save()
 
-    await Crateuser.updateOne({
-    username:email
-   },
+  //   await Crateuser.updateOne({
+  //     adduser:username
+  //  },
     
-    { $push: { adduser: savenum._id } });
+  //   { $push: { addusername: savenum._id } });
 
-res.json({"data":Crateuser})
+  const user = await Crateuser.findOne({username:localusernam});
+  user.addusername.push(savenum._id);
+  await user.save();
+   
+
+res.json({"data":user})
+console.log(savenum._id)
    } catch (error) {
     console.log('error',error)
+    res.json(error)
    }
   })
   
@@ -192,29 +199,29 @@ res.json({"data":Crateuser})
 router.post('/add', async (req, res) => {
 
   
+console.log( req.body.adduser)
+  // try {
 
-  try {
-
-    const newPost = new Adduser({
+  //   const newPost = new Adduser({
      
-      addnum: req.body.adduser, // Reference to the user
-    });
-     await newPost.save()
+  //     adduser: req.body.adduser, // Reference to the user
+  //   });
+  //    await newPost.save()
 
 
  
-    // Now add the post to the user's posts array
-    const user = await Saveuser.findOne({Namnum:req.body.Namnum});
+  //   // Now add the post to the user's posts array
+  //   const user = await Crateuser.findOne({username:req.body.username});
     
-     user.adduser.push(newPost._id)
-     await user.save()
+  //    user.adduser.push(newPost._id)
+  //    await user.save()
 
-     const getuser= await Saveuser.findOne({Namnum:req.body.Namnum}).populate('adduser')
-     res.json(getuser.adduser)
-    // res.status(201).json({ message: 'Post created!', user });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  //    const getuser= await Saveuser.findOne({username:req.body.username}).populate('adduser')
+  //    res.json(getuser.adduser)
+  //   // res.status(201).json({ message: 'Post created!', user });
+  // } catch (err) {
+  //   res.status(500).json({ error: err.message });
+  // }
 });
 
 
@@ -222,7 +229,7 @@ router.post('/get',async(req,res)=>{
 
   try {
     const user = await Saveuser.findOne({Namnum:req.body.Namnum}).populate('adduser')
-    res.json({user})
+    res.json(user.adduser.adduser)
     console.log(user)
   } catch (error) {
     res.json({'dastsa':error})
@@ -235,11 +242,21 @@ router.post('/get',async(req,res)=>{
 
 router.post('/alluser',async(req,res)=>{
 
+
+
+
+  const {usernamee}=req.body
+
   try {
-    const getuser = await Crateuser.findOne( {username:'sahilindia12'} ).populate('adduser');
-    console.log(getuser);
+    const getuser = await Crateuser.findOne( {username:usernamee} ).populate('addusername');
     
-    res.json(getuser.adduser);
+    console.log('user',getuser)
+   if (!getuser) {
+    res.json({data:"userdata not found"})
+   }
+   else{
+    res.json({datatt:getuser})
+   }
 } catch (error) {
     console.error('Error fetching user:', error);
     res.json({ error: error.message });
