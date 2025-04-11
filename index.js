@@ -109,6 +109,8 @@ app.get('/',(req,res)=>{
     // Event to send private messages
     socket.on('sendMessage', (recipientUsername, message) => {
       // Find the recipient's socket.id based on their username
+
+      console.log('mss',message)
       const recipientSocketId = Object.keys(socketUsernameMap).find(
         (id) => socketUsernameMap[id] === recipientUsername
       );
