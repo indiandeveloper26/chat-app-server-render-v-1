@@ -44,7 +44,10 @@ router.post('/singup', async (req, res) => {
  
 const {username,password}=req.body
 
-// console.log('data',username,password)
+// console.log(username,password)
+// res.send("hello")
+
+console.log('data',username,password)
   if (!username || !password) {
     return res.json({ message: 'Username and password are required' });
   }
@@ -63,8 +66,8 @@ const {username,password}=req.body
 
 
     const token = jwt.sign({ userId: crateuser._id}, JWT_SECRET, { expiresIn: '3333w' });
-    res.json({'datasave':crateuser,token})
-
+    res.json({crateuser,token})
+console.log(crateuser,token)
   
   } catch (error) {
     
