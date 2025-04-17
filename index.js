@@ -114,12 +114,13 @@ app.get('/',(req,res)=>{
       const recipientSocketId = Object.keys(socketUsernameMap).find(
         (id) => socketUsernameMap[id] === recipientUsername
       );
-  
+      console.log('mess',message)
       if (recipientSocketId) {
         // Send the private message to the recipient
         io.to(recipientSocketId).emit('privateMessage', {
           from: socketUsernameMap[socket.id],
           message,
+       
         });
         console.log(`Message sent to ${recipientUsername}: ${message}`);
       } else {

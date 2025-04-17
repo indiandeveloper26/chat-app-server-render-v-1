@@ -245,13 +245,14 @@ router.post('/get',async(req,res)=>{
 
 router.post('/alluser',async(req,res)=>{
 
+console.log('alluser0',req.body)
 
 
+  const {username}=req.body
 
-  const {usernamee}=req.body
 
   try {
-    const getuser = await Crateuser.findOne( {username:usernamee} ).populate('addusername');
+    const getuser = await Crateuser.findOne( {username:username} ).populate('addusername');
     
     console.log('user',getuser)
    if (!getuser) {

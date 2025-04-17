@@ -9,7 +9,7 @@ serchroute.post ("/",async(req,res)=>{
 
   let {username}=req.body
 
-
+  console.log(username)
  try {
   //  const getuser=await Crateuser.findOne({username:req.body.username})
 
@@ -27,6 +27,7 @@ serchroute.post ("/",async(req,res)=>{
 
     
    res.json(getuser.username)
+   console.log(getuser.username)
 
    }
  } catch (error) {
