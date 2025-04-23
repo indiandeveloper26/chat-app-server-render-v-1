@@ -105,6 +105,8 @@ app.get('/',(req,res)=>{
       // Send confirmation to the client
       socket.emit('usernameSet', `Username ${username} set successfully.`);
     });
+
+    socket.emit("test",'hellotese')
   
     // Event to send private messages
     socket.on('sendMessage', (recipientUsername, message) => {
@@ -118,7 +120,7 @@ app.get('/',(req,res)=>{
       if (recipientSocketId) {
         // Send the private message to the recipient
         io.to(recipientSocketId).emit('privateMessage', {
-          from: socketUsernameMap[socket.id],
+          username: socketUsernameMap[socket.id],
           message,
        
         });

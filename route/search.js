@@ -26,7 +26,7 @@ serchroute.post ("/",async(req,res)=>{
    else{
 
     
-   res.json(getuser.username)
+   res.json({username:getuser.username})
    console.log(getuser.username)
 
    }
