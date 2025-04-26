@@ -12,6 +12,7 @@ import http from 'http'
 import { serchroute } from './route/search.js';
 import derouter from './route/delete.js';
 import routeget from './route/getuser.js';
+import singuproute from './route/singup.js';
 
 
 
@@ -26,6 +27,7 @@ app.use(express.json());
 
 app.use('/saveuser',router)
 app.use('/test',routert)
+app.use('/singup',singuproute)
 app.use('/search',serchroute)
 app.use('/delate',derouter)
 app.use('/alluserget',routeget)
@@ -97,7 +99,8 @@ app.get('/',(req,res)=>{
     // Event to set username
     socket.on('setUsername', (username) => {
       // Save the socket.id and username mapping
-
+      // socket.emit('userStatus', { username: 'user1', status: true }); // Change username accordingly
+      io.emit('userStatus', { username, status: 'online' });
       console.log(username)
       socketUsernameMap[socket.id] = username;
       console.log(`Username set for ${socket.id}: ${username}`);
@@ -116,8 +119,9 @@ app.get('/',(req,res)=>{
       const recipientSocketId = Object.keys(socketUsernameMap).find(
         (id) => socketUsernameMap[id] === recipientUsername
       );
-      console.log('mess',message)
+      console.log('mess',recipientSocketId)
       if (recipientSocketId) {
+    
         // Send the private message to the recipient
         io.to(recipientSocketId).emit('privateMessage', {
           username: socketUsernameMap[socket.id],

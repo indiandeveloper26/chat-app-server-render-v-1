@@ -6,7 +6,8 @@ import express from 'express'
 import Adduser from '../modal/adduser.js';
 import Crateuser from '../modal/saveuser.js';
 import jwt from 'jsonwebtoken';
-
+// const bcrypt = require('bcrypt');
+import bcrypt from "bcrypt"
 const router = express.Router();  // Creates a new router instance
 const JWT_SECRET = 'your_secret_key';
 // Example route: Get all users
@@ -39,48 +40,91 @@ try {
 
 
 
-router.post('/singup', async (req, res) => {
+// router.post('/singup', async (req, res) => {
 
  
-const {username,password}=req.body
+// const {username,password}=req.body
 
-// console.log(username,password)
-// res.send("hello")
+// // console.log(username,password)
+// // res.send("hello")
 
-console.log('data',username,password)
-  if (!username || !password) {
-    return res.json({ message: 'Username and password are required' });
-  }
+// // console.log('data',username,password)
+// //   if (!username || !password) {
+// //     return res.json({ message: 'Username and password are required' });
+// //   }
 
-  try {
-    // Check if the username already exists
-    const existingUser = await Crateuser.findOne({ username });
-    if (existingUser) {
-      console.log('user allready ')
-     return  res.json({ 'data': 'Username already taken' });
-    }
+// //   try {
+// //     // Check if the username already exists
+// //     const existingUser = await Crateuser.findOne({ username });
+// //     if (existingUser) {
+// //       console.log('user allready ')
+// //      return res.json({ 'data': 'Username already taken' });
+// //     }
 
-    // Create a new user
-    const crateuser= new Crateuser({ username, password })
-    await crateuser.save()
+// //     // Create a new user
+// //     const crateuser= new Crateuser({ username, password })
+// //     await crateuser.save()
 
 
-    const token = jwt.sign({ userId: crateuser._id}, JWT_SECRET, { expiresIn: '3333w' });
-    res.json({crateuser,token})
-console.log(crateuser,token)
+// //     const token = jwt.sign({ userId: crateuser._id}, JWT_SECRET, { expiresIn: '3333w' });
+// //     res.json({crateuser,token})
+// // console.log(crateuser,token)
   
-  } catch (error) {
+// //   } catch (error) {
     
-  res.json({"error":error})
-  }
+// //   res.json({"error":error})
+// //   }
   
           
            
          
 
+
+
+  
+//     // Basic validation to check if username and password are provided
+//     if (!username || !password) {
+//       return res.status(400).json({ message: 'Username and password are required' });
+//     }
+  
+//     try {
+//       // Check if the username already exists in the database
+//       const existingUser = await Crateuser.findOne({ username });
+//       if (existingUser) {
+//         return res.status(400).json({ message: 'Username already taken' });
+//       }
+  
+//       // Hash the password before saving to the database
+//       const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
+  
+//       // Create a new user object
+//       const newUser = new Crateuser({
+//         username,
+//         password: hashedPassword,  // Save the hashed password
+//       });
+  
+//       // Save the new user to the database
+//       await newUser.save();
+  
+//       // Generate a JWT token for the newly created user
+//       const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '7d' });
+  
+//       // Send the response with the user and token
+//       res.json({
+//         user: {
+//           username: newUser.username,
+//           _id: newUser._id,
+//         },
+//         token,
+//       });
+//     } catch (error) {
+//       console.error('Error during signup:', error);
+//       res.status(500).json({ message: 'Internal server error' });
+//     }
+//   });
          
   
-  });
+  
 
   // router.post('/loging', async (req, res) => {
 
