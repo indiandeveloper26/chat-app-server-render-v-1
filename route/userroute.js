@@ -192,17 +192,21 @@ try {
     const {localusernam,adduser}=req.body
 
 console.log(localusernam,adduser)
-  
 
-   try {
+
+
+    const checkuser= await Adduser.findOne({adduser:adduser})
+
+    if (!checkuser) {
+
+    
+       try {
+
+   
     const savenum=await Adduser({adduser:adduser})
     await savenum.save()
 
-  //   await Crateuser.updateOne({
-  //     adduser:username
-  //  },
-    
-  //   { $push: { addusername: savenum._id } });
+  
 
   const user = await Crateuser.findOne({username:localusernam});
   user.addusername.push(savenum._id);
@@ -215,6 +219,12 @@ console.log(savenum._id)
     console.log('error',error)
     res.json(error)
    }
+    }
+    else{
+      res.send('useradllready exit')
+    }
+
+  
   })
   
 
@@ -289,7 +299,7 @@ router.post('/get',async(req,res)=>{
 
 router.post('/alluser',async(req,res)=>{
 
-console.log('alluser0',req.body)
+// console.log('alluser0',req.body)
 
 
   const {username}=req.body
@@ -298,7 +308,7 @@ console.log('alluser0',req.body)
   try {
     const getuser = await Crateuser.findOne( {username:username} ).populate('addusername');
     
-    console.log('user',getuser)
+    // console.log('user',getuser)
    if (!getuser) {
     res.json({data:"userdata not found"})
    }
