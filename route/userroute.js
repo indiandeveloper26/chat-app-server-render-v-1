@@ -191,7 +191,7 @@ try {
 
     const {localusernam,adduser}=req.body
 
-console.log(localusernam,adduser)
+console.log('data',"local",localusernam,"adduser",adduser)
 
 
 
@@ -212,9 +212,9 @@ console.log(localusernam,adduser)
   user.addusername.push(savenum._id);
   await user.save();
    
-
+console.log('add',user)
 res.json({"data":user})
-console.log(savenum._id)
+console.log(user)
    } catch (error) {
     console.log('error',error)
     res.json(error)
