@@ -187,45 +187,49 @@ try {
     });
 
 
-  router.post('/adduser',async(req,res)=>{
-
-    const {localusernam,adduser}=req.body
-
-console.log('data',"local",localusernam,"adduser",adduser)
+//   router.post('/adduser',async(req,res)=>{
 
 
 
-    const checkuser= await Adduser.findOne({adduser:adduser})
+  
 
-    if (!checkuser) {
+//     const {localusernam,adduser}=req.body
+
+// console.log('data',"local",localusernam,"adduser",adduser)
+
+
+
+//     const checkuser= await Adduser.findOne({adduser:"sonali"})
+
+//     if (!checkuser) {
 
     
-       try {
+//        try {
 
    
-    const savenum=await Adduser({adduser:adduser})
-    await savenum.save()
+//     const savenum=await Adduser({adduser:adduser})
+//     await savenum.save()
 
   
 
-  const user = await Crateuser.findOne({username:localusernam});
-  user.addusername.push(savenum._id);
-  await user.save();
+//   const user = await Crateuser.findOne({username:localusernam});
+//   user.addusername.push(savenum._id);
+//   await user.save();
    
-console.log('add',user)
-res.json({"data":user})
-console.log(user)
-   } catch (error) {
-    console.log('error',error)
-    res.json(error)
-   }
-    }
-    else{
-      res.send('useradllready exit')
-    }
+// console.log('add',user)
+// res.json({"data":user})
+// console.log(user)
+//    } catch (error) {
+//     console.log('error',error)
+//     res.json(error)
+//    }
+//     }
+//     else{
+//       res.send('useradllready exit')
+//     }
 
   
-  })
+//   })
   
 
 // Example route: Get a user by ID
@@ -256,15 +260,6 @@ console.log(user)
 router.post('/add', async (req, res) => {
 
   
-console.log( req.body.adduser)
-  // try {
-
-  //   const newPost = new Adduser({
-     
-  //     adduser: req.body.adduser, // Reference to the user
-  //   });
-  //    await newPost.save()
-
 
  
   //   // Now add the post to the user's posts array
@@ -285,7 +280,7 @@ console.log( req.body.adduser)
 router.post('/get',async(req,res)=>{
 
   try {
-    const user = await Saveuser.findOne({Namnum:req.body.Namnum}).populate('adduser')
+    const user = await Saveuser.findOne({username:"sonali"}).populate('adduser')
     res.json(user.adduser.adduser)
     console.log(user)
   } catch (error) {
@@ -321,6 +316,115 @@ router.post('/alluser',async(req,res)=>{
 }
 
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// router.post('/adduser', async (req, res) => {
+//   const { username, adduser } = req.body;
+
+//   console.log('data', "local",username , "adduser", adduser);
+
+//   try {
+//     // Check if adduser already exists in Adduser collection
+//     const checkuser = await Adduser.findOne({ adduser: adduser });
+
+//     if (!checkuser) {
+//       // If not exist, create new adduser document
+//       const savenum = new Adduser({ adduser: adduser });
+//       await savenum.save();
+
+//       // Find the user by username (localusernam) and add the saved adduser's _id
+//       const user = await Crateuser.findOne({ username: username });
+
+//       if (!user) {
+//         return res.status(404).json({ error: "Local user not found" });
+//       }
+
+//       user.addusername.push(savenum._id);
+//       await user.save();
+
+//       console.log('add', user);
+//       return res.json({ success: true, data: user });
+//     } else {
+//       return res.json({ success: false, message: 'User already exists in chat list' });
+//     }
+//   } catch (error) {
+//     console.log('error', error);
+//     return res.status(500).json({ success: false, error: error.message });
+//   }
+// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.post('/adduser', async (req, res) => {
+  const { username, adduser } = req.body;
+
+  console.log('Request:', { username, adduser });
+
+  try {
+    // Step 1: Check if adduser exists in Adduser collection
+    let existingAddUser = await Adduser.findOne({ adduser });
+
+    // Step 2: If not, create new Adduser
+    if (!existingAddUser) {
+      existingAddUser = new Adduser({ adduser });
+      await existingAddUser.save();
+    }
+
+    // Step 3: Find the local user
+    const localUser = await Crateuser.findOne({ username :username });
+
+    if (!localUser) {
+      return res.status(404).json({ error: "Local user not found" });
+    }
+
+    // Step 4: Check if already added
+    const alreadyExists = localUser.addusername.includes(existingAddUser._id);
+    if (alreadyExists) {
+      return res.status(400).json({ success: false, message: 'User already in chat list' });
+    }
+
+    // Step 5: Add reference
+    localUser.addusername.push(existingAddUser._id);
+    await localUser.save();
+
+    // Step 6: Populate the added user list if needed
+    const populatedUser = await Crateuser.findOne({ username }).populate('addusername');
+
+    return res.json({ success: true, data: populatedUser });
+  } catch (error) {
+    console.error('Error adding user:', error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+
+
 
 
 export default  router;  // Export the router

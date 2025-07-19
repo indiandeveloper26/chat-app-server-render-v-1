@@ -49,6 +49,8 @@ const JWT_SECRET='KAJFSLJDIOFFMNASDIJ'
 
 singupRoute.post('/', async (req, res) => {
     const { username, password } = req.body;
+
+    console.log(username,password)
   
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
@@ -88,6 +90,8 @@ singupRoute.post('/', async (req, res) => {
       console.error('Signup error:', error.message);
       res.status(500).json({ message: 'Internal Server Error' });
     }
+
+   
   });
   
   export default singupRoute
