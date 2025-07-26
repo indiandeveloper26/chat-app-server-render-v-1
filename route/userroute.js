@@ -406,7 +406,10 @@ router.post('/adduser', async (req, res) => {
     // Step 4: Check if already added
     const alreadyExists = localUser.addusername.includes(existingAddUser._id);
     if (alreadyExists) {
+      
+      console.log('user allread ')
       return res.status(400).json({ success: false, message: 'User already in chat list' });
+
     }
 
     // Step 5: Add reference
