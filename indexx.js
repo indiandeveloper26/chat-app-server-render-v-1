@@ -1290,14 +1290,137 @@
 
 
 
+// import express from 'express';
+// import http from 'http';
+// import { Server } from 'socket.io';
+// import cors from 'cors';
+// import { connectDB } from './db.js';
+// import PendingMessage from './modal/pandingsmm.js';
+
+// // ------ Routes ------
+// import router from './route/userroute.js';
+// import routert from './route/test.js';
+// import { serchroute } from './route/search.js';
+// import singuproute from './route/singup.js';
+// import chatlapi from './route/chatlist.js';
+// import routedlt from './route/delete.js';
+// import infinite from './route/infinite.js';
+// import log from './route/loging.js';
+// import loginRoute from './route/loging.js';
+
+// const app = express();
+// const server = http.createServer(app);
+// const io = new Server(server, {
+//   cors: { origin: '*' },
+// });
+
+// app.use(cors());
+// app.use(express.json());
+
+// app.use('/', router);
+// app.use('/test', routert);
+// app.use('/singup', singuproute);
+// app.use('/search', serchroute);
+// app.use('/delete', routedlt);
+// app.use('/log', loginRoute);
+// app.use('/chatlist', chatlapi);
+// app.use('/infinite', infinite);
+
+// app.get('/apitest', (req, res) => {
+//   res.json({ status: 'Server is running 👌' });
+// });
+
+// connectDB().then(() => console.log('✅ MongoDB Connected'))
+//   .catch(err => console.error('❌ MongoDB Connection Error:', err));
+
+// const usernameSocketMap = {};
+
+// io.on('connection', (socket) => {
+//   console.log(`🔗 Connected: ${socket.id}`);
+
+//   socket.on('setUsername', async (username) => {
+//     socket.username = username;
+
+//     if (!usernameSocketMap[username]) usernameSocketMap[username] = [];
+//     usernameSocketMap[username].push(socket.id);
+
+//     console.log(`✅ ${username} is online`);
+
+//     io.emit('userStatus', { username, online: true });
+
+//     const pending = await PendingMessage.find({ to: username });
+//     if (pending.length) {
+//       pending.forEach(m => socket.emit('privateMessage', m));
+//       await PendingMessage.deleteMany({ to: username });
+//     }
+//   });
+
+//   socket.on('typing', ({ from, to }) => {
+//     const recvs = usernameSocketMap[to] || [];
+//     recvs.forEach(id => io.to(id).emit('typing', { from }));
+//   });
+
+//   socket.on('sendMessage', async ({ id, from, to, message, timestamp, seen }) => {
+//     const payload = { id, from, to, message, timestamp, seen: false };
+
+//     const recvs = usernameSocketMap[to] || [];
+//     if (recvs.length) {
+//       recvs.forEach(id => io.to(id).emit('privateMessage', payload));
+//     } else {
+//       await PendingMessage.create(payload);
+//     }
+
+//     // ALSO send back to sender for consistency
+//     const senders = usernameSocketMap[from] || [];
+//     senders.forEach(id => io.to(id).emit('privateMessage', payload));
+//   });
+
+//   // ✅ SEEN FEATURE
+//   socket.on('seen', ({ from, to, ids }) => {
+//     // console.log(`🔵 Seen by ${from} for ${to}: ${ids}`);
+//     const recvs = usernameSocketMap[to] || [];
+//     recvs.forEach(id => {
+//       io.to(id).emit('messageSeen', { from, to, ids });
+//     });
+//   });
+
+//   socket.on('disconnect', () => {
+//     const username = socket.username;
+//     console.log(`❌ Disconnected: ${socket.id} (${username})`);
+
+//     if (username && usernameSocketMap[username]) {
+//       usernameSocketMap[username] = usernameSocketMap[username].filter(id => id !== socket.id);
+//       if (usernameSocketMap[username].length === 0) {
+//         delete usernameSocketMap[username];
+//         io.emit('userStatus', { username, online: false });
+//       }
+//     }
+//   });
+// });
+
+// server.listen(4000, () => console.log(`🚀 Server at http://localhost:4000`));
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ✅ server.js — FULL CLEAN VERSION
+
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
-import { connectDB } from './db.js';
-import PendingMessage from './modal/pandingsmm.js';
+import mongoose from 'mongoose';
 
-// ------ Routes ------
+// ✅ Routes & DB Connect
 import router from './route/userroute.js';
 import routert from './route/test.js';
 import { serchroute } from './route/search.js';
@@ -1306,96 +1429,115 @@ import chatlapi from './route/chatlist.js';
 import routedlt from './route/delete.js';
 import infinite from './route/infinite.js';
 import log from './route/loging.js';
-import loginRoute from './route/loging.js';
+import { connectDB } from './db.js';
 
+// ✅ MongoDB Model
+const pendingMessageSchema = new mongoose.Schema({
+  id: String,
+  from: String,
+  to: String,
+  message: String,
+  timestamp: String,
+  seen: Boolean,
+});
+const PendingMessage = mongoose.model('PendingMessage', pendingMessageSchema);
+
+// ✅ Express + HTTP + IO
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: '*' },
 });
 
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
+// ✅ Routes
 app.use('/', router);
 app.use('/test', routert);
 app.use('/singup', singuproute);
 app.use('/search', serchroute);
 app.use('/delete', routedlt);
-app.use('/log', loginRoute);
+app.use('/log', log);
 app.use('/chatlist', chatlapi);
 app.use('/infinite', infinite);
 
-app.get('/apitest', (req, res) => {
-  res.json({ status: 'Server is running 👌' });
+app.get('/apitest', (_, res) => {
+  res.json({ status: '✅ Server Running OK' });
 });
 
-connectDB().then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+// ✅ DB Connect
+connectDB().then(() => console.log('✅ MongoDB Connected')).catch(console.error);
 
+// ✅ Socket Maps
+const socketUsernameMap = {};
 const usernameSocketMap = {};
 
 io.on('connection', (socket) => {
-  console.log(`🔗 Connected: ${socket.id}`);
+  console.log(`🔗 New Socket: ${socket.id}`);
 
   socket.on('setUsername', async (username) => {
-    socket.username = username;
+    console.log(`✅ User online: ${username}`);
 
+    socketUsernameMap[socket.id] = username;
     if (!usernameSocketMap[username]) usernameSocketMap[username] = [];
     usernameSocketMap[username].push(socket.id);
 
-    console.log(`✅ ${username} is online`);
-
     io.emit('userStatus', { username, online: true });
 
+    // Send any pending
     const pending = await PendingMessage.find({ to: username });
     if (pending.length) {
-      pending.forEach(m => socket.emit('privateMessage', m));
+      console.log(`📥 Delivering ${pending.length} pending to ${username}`);
+      pending.forEach(msg => socket.emit('privateMessage', msg));
       await PendingMessage.deleteMany({ to: username });
     }
   });
 
-  socket.on('typing', ({ from, to }) => {
-    const recvs = usernameSocketMap[to] || [];
-    recvs.forEach(id => io.to(id).emit('typing', { from }));
-  });
-
-  socket.on('sendMessage', async ({ id, from, to, message, timestamp, seen }) => {
+  socket.on('sendMessage', async ({ id, from, to, message, timestamp }) => {
     const payload = { id, from, to, message, timestamp, seen: false };
 
-    const recvs = usernameSocketMap[to] || [];
-    if (recvs.length) {
+    const recvs = usernameSocketMap[to];
+    if (recvs && recvs.length > 0) {
+      console.log(`📤 ${from} ➡️ ${to} : ${message}`);
       recvs.forEach(id => io.to(id).emit('privateMessage', payload));
     } else {
+      console.log(`💾 Storing offline: ${to} ← ${message}`);
       await PendingMessage.create(payload);
     }
 
-    // ALSO send back to sender for consistency
-    const senders = usernameSocketMap[from] || [];
-    senders.forEach(id => io.to(id).emit('privateMessage', payload));
+    // echo back to sender too
+    const senders = usernameSocketMap[from];
+    if (senders) senders.forEach(id => io.to(id).emit('privateMessage', payload));
   });
 
-  // ✅ SEEN FEATURE
+  socket.on('typing', ({ from, to }) => {
+    const recvs = usernameSocketMap[to];
+    if (recvs) recvs.forEach(id => io.to(id).emit('typing', { from }));
+  });
+
   socket.on('seen', ({ from, to, ids }) => {
-    // console.log(`🔵 Seen by ${from} for ${to}: ${ids}`);
-    const recvs = usernameSocketMap[to] || [];
-    recvs.forEach(id => {
-      io.to(id).emit('messageSeen', { from, to, ids });
-    });
+    const recvs = usernameSocketMap[to];
+    if (recvs) recvs.forEach(id => io.to(id).emit('messageSeen', { from, to, ids }));
   });
 
   socket.on('disconnect', () => {
-    const username = socket.username;
-    console.log(`❌ Disconnected: ${socket.id} (${username})`);
+    const username = socketUsernameMap[socket.id];
+    delete socketUsernameMap[socket.id];
 
-    if (username && usernameSocketMap[username]) {
+    if (username) {
       usernameSocketMap[username] = usernameSocketMap[username].filter(id => id !== socket.id);
       if (usernameSocketMap[username].length === 0) {
         delete usernameSocketMap[username];
         io.emit('userStatus', { username, online: false });
       }
     }
+
+    console.log(`❌ Socket left: ${socket.id} (${username || 'unknown'})`);
   });
 });
 
-server.listen(4000, () => console.log(`🚀 Server at http://localhost:4000`));
+// ✅ Server Listen
+const PORT = 4000;
+server.listen(PORT, () => console.log(`🚀 Server: http://localhost:${PORT}`));
