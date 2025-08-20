@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
       required: true,
       unique: true, // Username must be unique
     },
+  isPremium: { type: Boolean, default: false },
+  premiumExpiry: { type: Date, default: null },
     password: {
       type: String,
       required: true,

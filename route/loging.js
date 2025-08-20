@@ -41,6 +41,7 @@ loginRoute.post('/', async (req, res) => {
         username: existingUser.username,
       },
       token,
+      userdata:existingUser
     });
 
   } catch (error) {

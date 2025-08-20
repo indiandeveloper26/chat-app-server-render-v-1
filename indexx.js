@@ -1420,7 +1420,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import mongoose from 'mongoose';
 
-// ✅ Routes & DB Connect
+// ✅ Routes & DB Connectf
 import router from './route/userroute.js';
 import routert from './route/test.js';
 import { serchroute } from './route/search.js';
@@ -1430,6 +1430,9 @@ import routedlt from './route/delete.js';
 import infinite from './route/infinite.js';
 import log from './route/loging.js';
 import { connectDB } from './db.js';
+import pymentroute from './route/paymnet.js';
+import Crateuser from './modal/saveuser.js';
+import dwroute from './route/dwonlaod.js';
 
 // ✅ MongoDB Model
 const pendingMessageSchema = new mongoose.Schema({
@@ -1462,9 +1465,19 @@ app.use('/delete', routedlt);
 app.use('/log', log);
 app.use('/chatlist', chatlapi);
 app.use('/infinite', infinite);
+app.use('/pyment',pymentroute );
+app.use('/download',dwroute );
 
 app.get('/apitest', (_, res) => {
   res.json({ status: '✅ Server Running OK' });
+});
+
+app.post('/getuser', async(req,res) => {
+
+  let {username}= req.body
+
+  let userdata= await Crateuser.findOne({username:username})
+  res.json({ status: '✅ Server Running OK',"userdasta":userdata });
 });
 
 // ✅ DB Connect
