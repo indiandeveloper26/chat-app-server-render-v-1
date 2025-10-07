@@ -26,13 +26,19 @@ const airoute = express.Router();
 
 airoute.post('/', async (req, res) => {
 
-    const {text}= req.body
+   // res.send("ai bot ready now")
 
-    console.log('data',text)
- 
- let dta=await aiComplete(text)
- console.log('data',dta)
-   res.json({'dta':dta})
+   try {
+      const { text } = req.body
+
+      console.log('data', text)
+
+      let dta = await aiComplete(text)
+      console.log('data', dta)
+      res.json({ 'dta': dta })
+   } catch (error) {
+      console.log('error', error)
+   }
 });
 
 

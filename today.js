@@ -558,6 +558,9 @@ import pymentroute from "./route/paymnet.js";
 import Crateuser from "./modal/saveuser.js";
 import dwroute from "./route/dwonlaod.js";
 import airoute from "./route/aibot.js";
+import errorroute from "./route/error.js";
+import errorHandler from "./middleware/errror.js";
+
 
 // ✅ MongoDB Model
 const pendingMessageSchema = new mongoose.Schema({
@@ -582,6 +585,8 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+
+
 // ✅ Static files (uploads)
 app.use("/uploads", express.static("uploads"));
 
@@ -589,7 +594,7 @@ app.use("/uploads", express.static("uploads"));
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
-    cb(null, "uploads/");
+    cb(null, "uploads");
   },
   filename: (req, file, cb) => {
     const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -614,6 +619,7 @@ app.use("/log", log);
 app.use("/chatlist", chatlapi);
 app.use("/infinite", infinite);
 app.use("/pyment", pymentroute);
+app.use("/error", errorroute)
 app.use("/download", dwroute);
 app.use("/aibot", airoute);
 
@@ -632,6 +638,8 @@ connectDB()
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(console.error);
 
+app.use(errorHandler)
+
 // ✅ Socket Maps
 const socketUsernameMap = {};
 const usernameSocketMap = {};
@@ -639,6 +647,62 @@ const usernameSocketMap = {};
 // ✅ Socket.io Logic
 io.on("connection", (socket) => {
   console.log(`🔗 New Socket: ${socket.id}`);
+
+
+
+
+  // callsetup
+
+
+  // ===== Call setup =====
+  socket.on("call-user", ({ from, to }) => {
+    console.log(`${from} is calling ${to}`);
+    const targetSocketId = usernameSocketMap[to];
+    if (2 == 2) {
+      io.to(targetSocketId).emit("incoming-call", { from });
+    }
+  });
+
+  socket.on("accept-call", ({ from, to }) => {
+    console.log(`${to} accepted call from ${from}`);
+    const targetSocketId = usernameSocketMap[to];
+    if (2 == 2) {
+      io.to(targetSocketId).emit("call-accepted", { from });
+    }
+  });
+
+  // ===== WebRTC signaling =====
+
+  // Offer from caller → send to callee
+  socket.on("webrtc-offer", ({ room, offer }) => {
+    const targetSocketId = usernameSocketMap[room];
+    if (targetSocketId) {
+      console.log(`Sending offer from ${socket.id} to ${room}`);
+      io.to(targetSocketId).emit("webrtc-offer", { offer, room: socket.id });
+    }
+  });
+
+  // Answer from callee → send to caller
+  socket.on("webrtc-answer", ({ room, answer }) => {
+    console.log(`Sending answer from ${socket.id} to ${room}`);
+    io.to(room).emit("webrtc-answer", { answer });
+  });
+
+  // ICE candidate exchange
+  socket.on("webrtc-ice-candidate", ({ room, candidate }) => {
+    const targetSocketId = usernameSocketMap[room];
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("webrtc-ice-candidate", { candidate });
+    }
+  });
+
+
+
+
+
+
+
+  // callsetup
 
   socket.on("setUsername", async (username) => {
     console.log(`✅ User online: ${username}`);
@@ -704,7 +768,7 @@ io.on("connection", (socket) => {
 });
 
 // ✅ Server Listen (Render + Local)
-const PORT = process.env.PORT || 4000;
-server.listen(PORT, "0.0.0.0", () => {
+const PORT = 4000;
+server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

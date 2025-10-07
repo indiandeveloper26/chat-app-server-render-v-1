@@ -20,7 +20,10 @@ export async function aiComplete(
 
   // आप चाहें तो safetySettings / systemInstruction भी दे सकते हैं
   const result = await gemini.generateContent({
-    contents: [{ role: "user", parts: [{ text: String(prompt) }]}],
+    contents: [{ role: "user", parts: [{ text: String(prompt) }] }],
+
+
+
   });
 
   // text निकालना
@@ -38,5 +41,5 @@ const run = async () => {
 run();
 */
 
-
-// console.log( await aiComplete(' what is react js and reacst netiv difreanse  '))
+// console.log(first)
+// console.log(await aiComplete(' what is react js and reacst netiv difreanse  '))
