@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  grouparr: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
   iamge: { type: String },
   addusername: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Adduser' }]
 });
