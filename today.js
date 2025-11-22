@@ -881,15 +881,10 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 
 
-const FRONTEND_URL = process.env.NODE_ENV === "production"
-  ? "https://your-production-frontend.com"
-  : "http://localhost:3000";
 
-// ✅ Middleware
-app.use(cors({
-  origin: "http://localhost:3000",  // frontend URL
-  credentials: true,     // cookies ke liye must
-}));
+app.use(cors());
+// cookies ke liye must
+
 app.use(express.json());
 app.use(cookieParser());
 
