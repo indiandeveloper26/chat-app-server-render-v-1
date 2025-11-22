@@ -21,7 +21,7 @@ import Crateuser from "../modal/saveuser.js";
 export const createGroup = async (req, res) => {
     try {
         const { name, userIds, creatorId } = req.body;
-
+        console.log(name, userIds, creatorId)
         if (!name || !creatorId || !userIds) {
             return res.status(400).json({ message: "All fields required" });
         }
@@ -43,7 +43,7 @@ export const createGroup = async (req, res) => {
         await group.save();
 
         const updatedUser = await Crateuser.findOneAndUpdate(
-            { username: "maall" },
+            { username: creatorId },
             { $push: { grouparr: group._id } },
             { new: true } // ye updated document return karega
         );
@@ -86,8 +86,12 @@ export const usergrouplist = async (req, res) => {
     if (!username) return res.status(400).json({ message: "Username required" });
 
     try {
-        const groups = await Group.find({ "usersgroup.name": username });
-        res.status(200).json({ groups });
+        const userWithGroups = await Crateuser.findOne({ username: username })
+            .populate({
+                path: "grouparr",            // user ke groups
+                populate: { path: "name", select: "username email" } // har group ke users ka detail
+            });
+        res.status(200).json({ userWithGroups });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });

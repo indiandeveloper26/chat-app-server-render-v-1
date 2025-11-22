@@ -9,7 +9,7 @@ const JWT_SECRET = 'KAJFSLJDIOFFMNASDIJ'; // ✅ Use .env in real project
 loginRoute.post('/', async (req, res) => {
   const { username, password } = req.body;
 
-  
+
   if (!username || !password) {
     return res.status(400).json({ message: 'Username and password are required' });
   }
@@ -41,8 +41,9 @@ loginRoute.post('/', async (req, res) => {
         username: existingUser.username,
       },
       token,
-      userdata:existingUser
+      userdata: existingUser
     });
+
 
   } catch (error) {
     console.error('Login error:', error);

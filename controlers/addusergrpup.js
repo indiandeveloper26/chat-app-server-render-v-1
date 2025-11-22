@@ -1,13 +1,8 @@
-
-
-
-
 // ✅ Add User to Group
-export const addusergroup = async (req, res) => {
+import Group from "../modal/groupmodle.js";
+import Crateuser from "../modal/saveuser.js";
 
-    // res.send("Addgrpu")
-
-
+export const addusrgroup = async (req, res) => {
     try {
         const { groupId, username } = req.body;
 
@@ -32,24 +27,20 @@ export const addusergroup = async (req, res) => {
             return res.json({ success: false, message: "User already in group" });
         }
 
-        // 4️⃣ Add user to group
-        group.members.push(user._id);
+        // 4️⃣ Add user to group's usersgroup array
+        group.usersgroup.push(user._id);
         await group.save();
 
-        // 5️⃣ Update user's group array
+        // 5️⃣ Add group to user's grouparr array (avoiding duplicates)
         await Crateuser.updateOne(
             { _id: user._id },
-            { $addToSet: { grouparr: group._id } }
+            { $addToSet: { grouparr: group._id } } // $addToSet avoids duplicates
         );
 
         res.json({ success: true, message: "User added to group" });
+
     } catch (err) {
         console.error("Error adding user:", err);
         res.status(500).json({ success: false, message: "Server error" });
     }
-}
-
-
-
-
-
+};

@@ -852,6 +852,7 @@ import chatlapi from "./route/chatlist.js";
 import routedlt from "./route/delete.js";
 import infinite from "./route/infinite.js";
 import log from "./route/loging.js";
+import cookieParser from "cookie-parser";
 import pymentroute from "./route/paymnet.js";
 import Crateuser from "./modal/saveuser.js";
 import dwroute from "./route/dwonlaod.js";
@@ -878,9 +879,19 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
+
+
+const FRONTEND_URL = process.env.NODE_ENV === "production"
+  ? "https://your-production-frontend.com"
+  : "http://localhost:3000";
+
 // ✅ Middleware
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",  // frontend URL
+  credentials: true,     // cookies ke liye must
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 // ✅ Static files (uploads)
 app.use("/uploads", express.static("uploads"));
@@ -919,13 +930,14 @@ app.use("/download", dwroute);
 app.use("/crategroup", grouproute);
 app.use("/aibot", airoute);
 
+
 app.get("/apitest", (req, res) => {
-  res.json({ status: "✅ Server Running OK-v-3" });
+  res.json({ status: "✅ Server Running OK-v-5" });
 });
 
-app.post("/getuser", async (req, res) => {
+app.get("/getuser", async (req, res) => {
   let { username } = req.body;
-  let userdata = await Group.findOne({ name: "maall" });
+  let userdata = await Group.find()
   res.json({ status: "✅ OK", userdasta: userdata });
 
 
@@ -933,6 +945,41 @@ app.post("/getuser", async (req, res) => {
 
 
 });
+
+app.post("/set-cookie", (req, res) => {
+  const { username } = req.body;
+
+  // JWT generate karo ya koi token
+  const token = "some-random-token";
+
+  // Cookie set karo
+  res.cookie("token", token, {
+    httpOnly: true,                       // client JS cannot access
+    secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+    maxAge: 7 * 24 * 60 * 60 * 1000,      // 7 days
+    sameSite: process.env.NODE_ENV === "production" ? "Strict" : "Lax",
+  });
+
+  res.json({ message: "Cookie set successfully!" });
+});
+
+
+app.post("/getuser", async (req, res) => {
+  try {
+    // req.body GET me usually nahi hota, query params ya POST body use karo
+    // let { username } = req.body; // optional
+
+    // Populate usersgroup (jo Crateuser reference hai)
+    const userdata = await Group.find().populate("usersgroup", "name");
+    // "username email" optional fields, agar sab chahiye to hata do
+
+    res.json({ status: "✅ OK", userdasta: userdata });
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ status: "❌ ERROR", message: "Server error" });
+  }
+});
+
 
 // ✅ DB Connect
 connectDB()
@@ -948,6 +995,40 @@ const usernameSocketMap = {};
 // ✅ Socket.io Logic
 io.on("connection", (socket) => {
   console.log(`🔗 New Socket: ${socket.id}`);
+
+
+  socket.on("joinGroup", ({ groupId }) => {
+    socket.join(groupId);
+    console.log(`${socket.id} joined ${groupId}`);
+  });
+
+
+
+
+
+
+
+
+  // Send message
+  socket.on("groupMessage", ({ groupId, username, text }) => {
+
+    console.log(groupId, username, text)
+    io.to(groupId).emit("groupmessage", { username, text, groupId });
+
+  });
+
+  // Leave group
+  socket.on("leaveGroup", ({ groupId, username }) => {
+    socket.leave(groupId);
+    io.to(groupId).emit("message", { system: true, text: `${username} left` });
+  });
+
+
+
+
+
+
+
 
   // ===== Call setup =====
   socket.on("call-user", ({ from, to }) => {
@@ -991,7 +1072,7 @@ io.on("connection", (socket) => {
 
   // ===== User online/offline + pending messages =====
   socket.on("setUsername", async (username) => {
-    console.log('useronlei', username)
+    console.log('userconnected  id--', username)
     socketUsernameMap[socket.id] = username;
     if (!usernameSocketMap[username]) usernameSocketMap[username] = [];
     usernameSocketMap[username].push(socket.id);
@@ -1007,6 +1088,7 @@ io.on("connection", (socket) => {
 
   // ===== Chat messaging =====
   socket.on("sendMessage", async ({ id, from, to, message, type, timestamp }) => {
+    console.log(message, from, to)
     const payload = { id, from, to, message, type, timestamp, seen: false };
     const recvs = usernameSocketMap[to];
     if (recvs?.length) recvs.forEach((id) => io.to(id).emit("privateMessage", payload));
